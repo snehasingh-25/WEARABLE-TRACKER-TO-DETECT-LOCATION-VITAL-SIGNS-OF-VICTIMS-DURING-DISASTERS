@@ -6,7 +6,7 @@ The goal is to **reduce response time**, **prioritize critical victims**, and **
 
 ---
 
-## 🚨 Problem Statement
+## Problem Statement
 
 During large-scale disasters (earthquakes, floods, building collapses, landslides, etc.):
 
@@ -19,7 +19,7 @@ This project proposes a **wearable tracker + software system** to tackle these c
 
 ---
 
-## 🎯 Objectives
+## Objectives
 
 - Track **real-time GPS location** of victims using a wearable device.
 - Monitor **vital signs** such as:
@@ -34,7 +34,7 @@ This project proposes a **wearable tracker + software system** to tackle these c
 
 ---
 
-## 🏗️ System Architecture Overview
+## System Architecture Overview
 
 
 1. **Wearable Device (Hardware Layer)**  
@@ -70,9 +70,9 @@ This project proposes a **wearable tracker + software system** to tackle these c
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 🧍 Wearable Device
+### Wearable Device
 
 - Continuous sensing of:
   - Heart rate (BPM)
@@ -81,7 +81,7 @@ This project proposes a **wearable tracker + software system** to tackle these c
 - Configurable data sending interval (e.g., every 10–30 seconds).
 - Low-power operation mode (depending on hardware).
 
-### 📡 Backend
+### Backend
 
 - Secure REST endpoints to:
   - Register victims / devices
@@ -92,7 +92,7 @@ This project proposes a **wearable tracker + software system** to tackle these c
   - Predefined thresholds (e.g., SpO₂ < 90 ⇒ Critical)
   - Marks each victim’s status: `NORMAL`, `WARNING`, `CRITICAL`.
 
-### 📱 Mobile App (React Native)
+### Mobile App (React Native)
 
 - **Login / Authentication** (if implemented).
 - **Victim List Screen**
@@ -111,7 +111,7 @@ This project proposes a **wearable tracker + software system** to tackle these c
 
 ---
 
-## 🧰 Tech Stack
+## Tech Stack
 
 ### Hardware
 
@@ -141,11 +141,11 @@ This project proposes a **wearable tracker + software system** to tackle these c
 ---
 
 
-![App Demo](./frontend/assets/project/1.jpeg)
-![App Demo](./frontend/assets/project/2.jpeg)
-![App Demo](./frontend/assets/project/4.jpeg)
-![App Demo](./frontend/assets/project/5.jpeg)
+App Screenshots
+<p align="center"> <img src="./frontend/assets/project/1.jpeg" width="280"/> <img src="./frontend/assets/project/2.jpeg" width="280"/> </p> <p align="center"> <img src="./frontend/assets/project/4.jpeg" width="280"/> <img src="./frontend/assets/project/5.jpeg" width="280"/> </p>
 
-![Flow diagram](./frontend/assets/project/flow.jpeg)
+System Flow Diagram
+<p align="center"> <img src="./frontend/assets/project/flow.jpeg" width="600"/> </p>
+
 
 
