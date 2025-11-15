@@ -141,42 +141,11 @@ This project proposes a **wearable tracker + software system** to tackle these c
 ---
 
 
-This is an example structure if backend and app are in the same repo:
+![App Demo](./frontend/assets/project/1.jpeg)
+![App Demo](./frontend/assets/project/2.jpeg)
+![App Demo](./frontend/assets/project/4.jpeg)
+![App Demo](./frontend/assets/project/5.jpeg)
 
-```bash
-root/
-├─ backend/
-│  ├─ src/
-│  │  ├─ config/
-│  │  ├─ controllers/
-│  │  ├─ models/
-│  │  ├─ routes/
-│  │  ├─ utils/
-│  │  └─ app.js
-│  ├─ .env
-│  ├─ package.json
-│  └─ README.md
-│
-├─ mobile-app/
-│  ├─ src/
-│  │  ├─ components/
-│  │  ├─ screens/
-│  │  ├─ navigation/
-│  │  ├─ hooks/
-│  │  ├─ services/   # API calls
-│  │  └─ App.tsx / App.js
-│  ├─ package.json
-│  ├─ android/
-│  └─ ios/
-│
-└─ docs/
-   ├─ architecture-diagram.png
-   └─ api-specification.md
+![Flow diagram](./frontend/assets/project/flow.jpeg)
 
-![App Demo](./assets/project/1.jpeg)
-![App Demo](./assets/project/2.jpeg)
-![App Demo](./assets/project/4.jpeg)
-![App Demo](./assets/project/5.jpeg)
-
-![App Demo](./assets/project/flow.jpeg)
 
