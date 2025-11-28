@@ -107,7 +107,7 @@ This project proposes a **wearable tracker + software system** to tackle these c
   - Plots all victims on a map with color-coded markers by severity.
 - **Alerts**
   - Highlights high-risk victims at the top.
-  - (Optional) Push notifications for critical status.
+  - Push notifications for critical status.
 
 ---
 
