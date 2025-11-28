@@ -1,17 +1,43 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
+require("dotenv").config();
+
+const WearableData = require("./models/WearableData");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ------------------ MONGO CONNECTION ------------------
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected ✔"))
+  .catch((err) => console.log("MongoDB connection error:", err));
+
+// ------------------ ROUTES ----------------------------
+
 app.get("/", (req, res) => {
-  res.send("ESP32 Backend Running!");
+  res.send("ESP32 Backend Running + MongoDB Connected!");
 });
 
-app.post("/data", (req, res) => {
-  console.log("Incoming data from ESP32:", req.body);
-  res.json({ status: "ok", received: req.body });
+app.post("/data", async (req, res) => {
+  try {
+    console.log("Incoming data from ESP32:", req.body);
+
+    const { bpm, lat, lng, sos } = req.body;
+
+    // save to MongoDB
+    const entry = new WearableData({ bpm, lat, lng, sos });
+    await entry.save();
+
+    res.json({ status: "stored", entry });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to save data", details: error });
+  }
 });
 
-app.listen(3000, () => console.log("Backend running on port 3000"));
+// -------------------------------------------------------
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log("Backend running on port", port));
