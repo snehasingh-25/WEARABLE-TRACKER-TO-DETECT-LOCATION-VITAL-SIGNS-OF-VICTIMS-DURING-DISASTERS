@@ -13,16 +13,13 @@ import MapView, { Marker } from 'react-native-maps';
 export default function Index() {
   const router = useRouter();
 
-  const user = { name: 'Sneha Singh' };
-type VitalStatus = 'Safe' | 'At Risk';
-const vitals: { status: VitalStatus; heartRate: number; temperature: number } = {
-  status: 'Safe',
-  heartRate: 78,
-  temperature: 36.7
-};
+  
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [locationError, setLocationError] = useState(false);
+  const [liveData, setLiveData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
 
   // Get user location
   useEffect(() => {
@@ -52,6 +49,36 @@ const vitals: { status: VitalStatus; heartRate: number; temperature: number } = 
       }
     })();
   }, []);
+
+  useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const response = await fetch("https://wearable-tracker-to-detect-location.onrender.com/latest");
+      const json = await response.json();
+      setLiveData(json);
+    } catch (error) {
+      console.log("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+
+  // Auto refresh every 5 seconds
+  const interval = setInterval(fetchData, 5000);
+
+  return () => clearInterval(interval);
+}, []);
+
+const user = { name: 'Sneha Singh' };
+type VitalStatus = 'Safe' | 'At Risk';
+const vitals: {heartRate: number; temperature: number } = {
+  heartRate: liveData?.bpm,
+  temperature: 36.7
+};
+const status = vitals.heartRate > 100 ? "At Risk" : "Safe";
+
 
   const handleSOS = () => {
     Alert.alert(
@@ -116,7 +143,7 @@ const vitals: { status: VitalStatus; heartRate: number; temperature: number } = 
         <View className="mb-6">
           <View className="flex-row items-center">
             <Text className="text-gray-900 text-base font-semibold mr-2">Status:</Text>
-            <StatusIndicator status={vitals.status} size="large" />
+            <StatusIndicator status={status} size="large" />
           </View>
         </View>
 

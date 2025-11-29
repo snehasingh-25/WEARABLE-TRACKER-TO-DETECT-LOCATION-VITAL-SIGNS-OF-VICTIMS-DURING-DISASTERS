@@ -49,6 +49,15 @@ app.get("/latest", async (req, res) => {
   }
 });
 
+app.get("/latest3", async (req, res) => {
+  try {
+    const latestThree = await WearableData.find().sort({ timestamp: -1 }).limit(3);
+    res.json(latestThree);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch latest 3 entries", details: error });
+  }
+});
+
 
 // -------------------------------------------------------
 
