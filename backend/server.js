@@ -37,6 +37,19 @@ app.post("/data", async (req, res) => {
   }
 });
 
+app.get("/latest", async (req, res) => {
+  try {
+    const latest = await WearableData.findOne().sort({ timestamp: -1 });
+    if (!latest) {
+      return res.status(404).json({ message: "No data found" });
+    }
+    res.json(latest);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch latest data", details: error });
+  }
+});
+
+
 // -------------------------------------------------------
 
 const port = process.env.PORT || 3000;
