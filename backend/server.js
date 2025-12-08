@@ -25,10 +25,9 @@ app.post("/data", async (req, res) => {
   try {
     console.log("Incoming data from ESP32:", req.body);
 
-    const { bpm, lat, lng, sos } = req.body;
+    const { userId, name, bpm, lat, lng, sos } = req.body;
 
-    // save to MongoDB
-    const entry = new WearableData({ bpm, lat, lng, sos });
+    const entry = new WearableData({ userId, name, bpm, lat, lng, sos });
     await entry.save();
 
     res.json({ status: "stored", entry });
@@ -36,6 +35,7 @@ app.post("/data", async (req, res) => {
     res.status(500).json({ error: "Failed to save data", details: error });
   }
 });
+
 
 app.get("/latest", async (req, res) => {
   try {
@@ -60,6 +60,51 @@ app.get("/latest3", async (req, res) => {
 
 
 // -------------------------------------------------------
+
+
+app.get("/rescuer/latest-all", async (req, res) => {
+  try {
+    const latestPerUser = await WearableData.aggregate([
+      { $sort: { timestamp: -1 } }, // latest first
+      {
+        $group: {
+          _id: "$userId",
+          latest: { $first: "$$ROOT" },
+        },
+      },
+      {
+        $replaceRoot: { newRoot: "$latest" },
+      },
+    ]);
+
+    res.json(latestPerUser);
+  } catch (error) {
+    console.error("Error in /rescuer/latest-all:", error);
+    res.status(500).json({ error: "Failed to fetch rescuer data", details: error });
+  }
+});
+
+
+app.get("/rescuer/sos", async (req, res) => {
+  try {
+    const sosUsers = await WearableData.aggregate([
+      { $match: { sos: true } },
+      { $sort: { timestamp: -1 } },
+      {
+        $group: {
+          _id: "$userId",
+          latest: { $first: "$$ROOT" },
+        },
+      },
+      { $replaceRoot: { newRoot: "$latest" } },
+    ]);
+
+    res.json(sosUsers);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch SOS users", details: error });
+  }
+});
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log("Backend running on port", port));
