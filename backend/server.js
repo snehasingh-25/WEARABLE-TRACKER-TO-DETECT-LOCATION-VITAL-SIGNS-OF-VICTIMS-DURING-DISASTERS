@@ -105,6 +105,47 @@ app.get("/rescuer/sos", async (req, res) => {
   }
 });
 
+app.get("/alerts/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const alerts = await WearableData.find({
+      userId,
+      $or: [
+        { sos: true },
+        { bpm: { $gt: 100 } },
+        { bpm: { $lt: 50 } },
+      ],
+    }).sort({ timestamp: -1 });
+
+    res.json(alerts);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch alerts" });
+  }
+});
+
+
+app.post("/sos", async (req, res) => {
+  try {
+    const { userId, name, bpm, lat, lng } = req.body;
+
+    const sosEntry = new WearableData({
+      userId,
+      name,
+      bpm,
+      lat,
+      lng,
+      sos: true,
+    });
+
+    await sosEntry.save();
+
+    res.json({ status: "SOS_TRIGGERED", entry: sosEntry });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to trigger SOS", details: error });
+  }
+});
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log("Backend running on port", port));

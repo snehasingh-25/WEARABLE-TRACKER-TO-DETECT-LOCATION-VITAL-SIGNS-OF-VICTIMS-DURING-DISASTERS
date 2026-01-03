@@ -80,24 +80,50 @@ const vitals: {heartRate: number; temperature: number } = {
 const status = vitals.heartRate > 100 ? "At Risk" : "Safe";
 
 
-  const handleSOS = () => {
-    Alert.alert(
-      'Send SOS',
-      'Are you sure you want to send an emergency alert to all your contacts?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Send SOS',
-          style: 'destructive',
-          onPress: () => {
-            // TODO: Implement actual SOS sending logic
-            // Send location, vitals, and alert to emergency contacts
-            Alert.alert('SOS Sent', 'Emergency alert sent to all contacts with your current location and vitals');
-          },
+  const handleSOS = async () => {
+  if (!location || !liveData) {
+    Alert.alert("Error", "Location or vitals not available");
+    return;
+  }
+
+  Alert.alert(
+    "Send SOS",
+    "Are you sure you want to send an emergency alert?",
+    [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Send SOS",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await fetch(
+              "https://wearable-tracker-to-detect-location.onrender.com/sos",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  userId: "device_001",
+                  name: user.name,
+                  bpm: liveData.bpm,
+                  lat: location.latitude,
+                  lng: location.longitude,
+                }),
+              }
+            );
+
+            Alert.alert(
+              "SOS Sent",
+              "Rescue team has been notified with your live location."
+            );
+          } catch (error) {
+            Alert.alert("Error", "Failed to send SOS");
+          }
         },
-      ]
-    );
-  };
+      },
+    ]
+  );
+};
+
 
   const handleLogout = () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
