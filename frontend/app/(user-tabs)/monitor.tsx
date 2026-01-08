@@ -67,7 +67,7 @@ export default function Monitor() {
   const latitude = latest?.lat ?? 0;
   const longitude = latest?.lng ?? 0;
 
-  // Status must match your StatusIndicator props ("Safe" | "At Risk")
+  // Status must match your StatusIndicator props ("Safe" | "Risk")
   const status: "Safe" | "Risk" =
     latest.sos || heartRate > 100 ? "Risk" : "Safe";
 

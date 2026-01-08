@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface VitalSigns {
   heartRate: number;
   temperature: number;
-  status: 'Safe' | 'At Risk';
+  status: 'Safe' | 'Risk';
   lastUpdated: Date;
 }
 
@@ -48,7 +48,7 @@ export const VitalsProvider = ({ children }: { children: ReactNode }) => {
         const newVitals = {
           heartRate: Math.round(newHeartRate * 10) / 10,
           temperature: Math.round(newTemperature * 10) / 10,
-          status: isAtRisk ? 'At Risk' as const : 'Safe' as const,
+          status: isAtRisk ? 'Risk' as const : 'Safe' as const,
           lastUpdated: new Date(),
         };
 

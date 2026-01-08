@@ -21,13 +21,52 @@ app.get("/", (req, res) => {
   res.send("ESP32 Backend Running + MongoDB Connected!");
 });
 
+// ------------------ AUTH (LOGIN) ------------------
+
+app.post("/auth/login", (req, res) => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
+  }
+
+  // Hardcoded users for demo
+  if (email === "user@gmail.com") {
+    return res.json({
+      userId: "device_001",
+      name: "Sneha Singh",
+      role: "user",
+    });
+  }
+
+  if (email === "rescuer@gmail.com") {
+    return res.json({
+      userId: "rescuer_001",
+      name: "Rescue Officer",
+      role: "rescuer",
+    });
+  }
+
+  return res.status(401).json({ error: "Unauthorized user" });
+});
+
+
 app.post("/data", async (req, res) => {
   try {
     console.log("Incoming data from ESP32:", req.body);
 
-    const { userId, name, bpm, lat, lng, sos } = req.body;
+    const { userId, name, bpm, spo2, lat, lng, sos } = req.body;
 
-    const entry = new WearableData({ userId, name, bpm, lat, lng, sos });
+
+    const entry = new WearableData({
+      userId,
+      name,
+      bpm,
+      spo2,
+      lat,
+      lng,
+      sos: !!sos,
+    });
     await entry.save();
 
     res.json({ status: "stored", entry });
@@ -49,9 +88,9 @@ app.get("/latest", async (req, res) => {
   }
 });
 
-app.get("/latest3", async (req, res) => {
+app.get("/latest6", async (req, res) => {
   try {
-    const latestThree = await WearableData.find().sort({ timestamp: -1 }).limit(3);
+    const latestThree = await WearableData.find().sort({ timestamp: -1 }).limit(6);
     res.json(latestThree);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch latest 3 entries", details: error });

@@ -1,17 +1,22 @@
 const mongoose = require("mongoose");
 
+
 const WearableDataSchema = new mongoose.Schema({
   userId: {
     type: String,
-    required: true,         // e.g. "device_001" or user ID from auth
+    required: true,
+    index: true,
   },
   name: {
     type: String,
-    required: true,         // e.g. "Sneha Singh"
+    required: true,
   },
   bpm: {
     type: Number,
     required: true,
+  },
+  spo2: {
+    type: Number,
   },
   lat: {
     type: Number,
@@ -24,6 +29,7 @@ const WearableDataSchema = new mongoose.Schema({
   sos: {
     type: Boolean,
     default: false,
+    index: true,
   },
   timestamp: {
     type: Date,

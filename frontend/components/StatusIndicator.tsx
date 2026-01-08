@@ -3,7 +3,7 @@ import { View, Text } from 'react-native';
 import cn from 'clsx';
 
 interface StatusIndicatorProps {
-  status: 'Safe' | 'At Risk';
+  status: 'Safe' | 'Risk';
   size?: 'small' | 'large';
 }
 

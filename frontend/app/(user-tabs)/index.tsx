@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Index() {
   const router = useRouter();
@@ -19,6 +20,7 @@ export default function Index() {
   const [locationError, setLocationError] = useState(false);
   const [liveData, setLiveData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const { logout } = useAuth();
 
 
   // Get user location
@@ -37,8 +39,8 @@ export default function Index() {
           accuracy: Location.Accuracy.Balanced,
         });
         setLocation({
-          latitude: loc.coords.latitude,
-          longitude: loc.coords.longitude,
+          latitude: 13.151252,
+          longitude: 77.609938,
         });
         setLoadingLocation(false);
       } catch (error) {
@@ -72,12 +74,12 @@ export default function Index() {
 }, []);
 
 const user = { name: 'Sneha Singh' };
-type VitalStatus = 'Safe' | 'At Risk';
+type VitalStatus = 'Safe' | 'Risk';
 const vitals: {heartRate: number; temperature: number } = {
   heartRate: liveData?.bpm,
   temperature: 36.7
 };
-const status = vitals.heartRate > 100 ? "At Risk" : "Safe";
+const status = vitals.heartRate > 100 ? "Risk" : "Safe";
 
 
   const handleSOS = async () => {
@@ -125,12 +127,21 @@ const status = vitals.heartRate > 100 ? "At Risk" : "Safe";
 };
 
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => router.replace('/') },
-    ]);
-  };
+const handleLogout = () => {
+  Alert.alert("Logout", "Are you sure you want to logout?", [
+    { text: "Cancel", style: "cancel" },
+    {
+      text: "Logout",
+      style: "destructive",
+      onPress: async () => {
+        await logout();
+        router.replace("/(auth)/sign-in");
+      },
+    },
+  ]);
+};
+
+
 
   const refreshLocation = async () => {
     setLoadingLocation(true);

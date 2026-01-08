@@ -1,14 +1,16 @@
 import { Redirect } from "expo-router";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function Index() {
-  const isAuthenticated = true;   
-  const role = "user";         // "user" | "rescuer"
+  const { user, loading } = useAuth();
 
-  if (!isAuthenticated) {
+  if (loading) return null; // splash / loader
+
+  if (!user) {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
-  if (role === "rescuer") {
+  if (user.role === "rescuer") {
     return <Redirect href="/(rescuer-tabs)/rescuer" />;
   }
 

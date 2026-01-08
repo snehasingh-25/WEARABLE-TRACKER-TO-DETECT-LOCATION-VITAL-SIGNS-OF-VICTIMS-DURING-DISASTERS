@@ -21,7 +21,6 @@ export default function ContactsScreen() {
     { id: '2', name: 'Dad', phone: '+91 234567890' },
     { id: 'police', name: 'Police', phone: '100', role: 'Emergency' },
     { id: 'ambulance', name: 'Ambulance', phone: '102', role: 'Medical' },
-    { id: 'fire', name: 'Fire Brigade', phone: '101', role: 'Fire' },
     { id: 'disaster', name: 'Disaster Management', phone: '108', role: 'Disaster Response' },
     { id: 'hospital', name: 'Nearest Hospital', phone: '+91-11-12345678', role: 'Hospital' },
   ]);

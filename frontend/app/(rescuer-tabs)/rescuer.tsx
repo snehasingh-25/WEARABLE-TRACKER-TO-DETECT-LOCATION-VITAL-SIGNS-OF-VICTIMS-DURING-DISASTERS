@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,12 @@ import {
   Alert,
   Linking,
   Platform,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
-import * as Location from 'expo-location';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
+import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
+import { useAuth } from "@/contexts/AuthContext";
 
 type UserEntry = {
   _id: string;
@@ -25,12 +26,14 @@ type UserEntry = {
   timestamp: string;
 };
 
-type StatusType = 'Safe' | 'At Risk' | 'SOS';
+type StatusType = "Safe" | "Risk" | "SOS";
 
 export default function RescuerDashboard() {
+  const { logout } = useAuth();
+
   const [users, setUsers] = useState<UserEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedView, setSelectedView] = useState<'list' | 'map'>('list');
+  const [selectedView, setSelectedView] = useState<"list" | "map">("list");
 
   const [rescuerLocation, setRescuerLocation] = useState<{
     latitude: number;
@@ -44,22 +47,22 @@ export default function RescuerDashboard() {
 
   // ---------------- STATUS LOGIC ----------------
   const getStatus = (user: UserEntry): StatusType => {
-    if (user.sos) return 'SOS';
-    if (user.bpm > 100 || user.bpm < 50) return 'At Risk';
-    return 'Safe';
+    if (user.sos) return "SOS";
+    if (user.bpm > 100 || user.bpm < 50) return "Risk";
+    return "Safe";
   };
 
   const statusColor = (status: StatusType) => {
-    if (status === 'SOS') return '#dc2626';
-    if (status === 'At Risk') return '#f97316';
-    return '#16a34a';
+    if (status === "SOS") return "#dc2626";
+    if (status === "Risk") return "#f97316";
+    return "#16a34a";
   };
 
-  // ---------------- FETCH RESCUER LOCATION ----------------
+  // ---------------- RESCUER LOCATION ----------------
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') return;
+      if (status !== "granted") return;
 
       const loc = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.Balanced,
@@ -76,7 +79,7 @@ export default function RescuerDashboard() {
   const fetchData = async () => {
     try {
       const res = await fetch(
-        'https://wearable-tracker-to-detect-location.onrender.com/rescuer/latest-all'
+        "https://wearable-tracker-to-detect-location.onrender.com/rescuer/latest-all"
       );
       const json = await res.json();
       setUsers(json);
@@ -85,7 +88,7 @@ export default function RescuerDashboard() {
         setCenter({ latitude: json[0].lat, longitude: json[0].lng });
       }
     } catch (err) {
-      Alert.alert('Error', 'Failed to fetch rescuer data');
+      Alert.alert("Error", "Failed to fetch rescuer data");
     } finally {
       setLoading(false);
     }
@@ -97,10 +100,24 @@ export default function RescuerDashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  // ---------------- LOGOUT ----------------
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await logout(); // clears context + AsyncStorage
+        },
+      },
+    ]);
+  };
+
   // ---------------- GOOGLE MAPS NAVIGATION ----------------
   const openGoogleMapsRoute = (lat: number, lng: number, name: string) => {
     if (!rescuerLocation) {
-      Alert.alert('Location unavailable', 'Rescuer location not found');
+      Alert.alert("Location unavailable", "Rescuer location not found");
       return;
     }
 
@@ -112,32 +129,30 @@ export default function RescuerDashboard() {
       ios: `comgooglemaps://?saddr=${origin}&daddr=${destination}&directionsmode=driving`,
     });
 
-    Alert.alert(
-      'Navigate',
-      `Open route to ${name} in Google Maps?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Open',
-          onPress: () =>
-            Linking.openURL(url!).catch(() =>
-              Alert.alert('Error', 'Google Maps not installed')
-            ),
-        },
-      ]
-    );
+    Alert.alert("Navigate", `Open route to ${name} in Google Maps?`, [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Open",
+        onPress: () =>
+          Linking.openURL(url!).catch(() =>
+            Alert.alert("Error", "Google Maps not installed")
+          ),
+      },
+    ]);
   };
 
   // ---------------- COUNTS ----------------
   const totalUsers = users.length;
-  const sosCount = users.filter(u => u.sos).length;
-  const atRiskCount = users.filter(u => getStatus(u) === 'At Risk').length;
+  const sosCount = users.filter((u) => u.sos).length;
+  const atRiskCount = users.filter((u) => getStatus(u) === "Risk").length;
 
   if (loading) {
     return (
       <SafeAreaView className="flex-1 justify-center items-center bg-gray-50">
         <ActivityIndicator size="large" />
-        <Text className="mt-2 text-gray-600">Loading rescuer dashboard...</Text>
+        <Text className="mt-2 text-gray-600">
+          Loading rescuer dashboard...
+        </Text>
       </SafeAreaView>
     );
   }
@@ -150,7 +165,21 @@ export default function RescuerDashboard() {
           <Text className="text-gray-500 text-sm">Rescuer Panel</Text>
           <Text className="text-gray-900 text-xl font-bold">Dashboard</Text>
         </View>
-        <Ionicons name="shield-checkmark-outline" size={28} color="#2563eb" />
+
+        <View className="flex-row items-center gap-4">
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={26}
+            color="#2563eb"
+          />
+          <TouchableOpacity onPress={handleLogout}>
+            <Ionicons
+              name="log-out-outline"
+              size={26}
+              color="#6b7280"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* SUMMARY */}
@@ -160,30 +189,32 @@ export default function RescuerDashboard() {
           <Text className="text-lg font-bold">{totalUsers}</Text>
         </View>
         <View className="flex-1 bg-white rounded-xl p-3 mr-2">
-          <Text className="text-xs text-gray-500">At Risk</Text>
+          <Text className="text-xs text-gray-500">Risk</Text>
           <Text className="text-lg font-bold text-orange-500">
             {atRiskCount}
           </Text>
         </View>
         <View className="flex-1 bg-white rounded-xl p-3">
           <Text className="text-xs text-gray-500">SOS</Text>
-          <Text className="text-lg font-bold text-red-500">{sosCount}</Text>
+          <Text className="text-lg font-bold text-red-500">
+            {sosCount}
+          </Text>
         </View>
       </View>
 
       {/* TOGGLE */}
       <View className="px-5 flex-row mb-3 bg-white rounded-full p-1 self-center">
-        {['list', 'map'].map(v => (
+        {["list", "map"].map((v) => (
           <TouchableOpacity
             key={v}
             className={`flex-1 items-center py-1 rounded-full ${
-              selectedView === v ? 'bg-blue-500' : ''
+              selectedView === v ? "bg-blue-500" : ""
             }`}
             onPress={() => setSelectedView(v as any)}
           >
             <Text
               className={`text-xs ${
-                selectedView === v ? 'text-white' : 'text-gray-600'
+                selectedView === v ? "text-white" : "text-gray-600"
               }`}
             >
               {v.toUpperCase()}
@@ -193,9 +224,9 @@ export default function RescuerDashboard() {
       </View>
 
       {/* LIST VIEW */}
-      {selectedView === 'list' ? (
+      {selectedView === "list" ? (
         <ScrollView className="flex-1 px-5">
-          {users.map(u => {
+          {users.map((u) => {
             const status = getStatus(u);
             return (
               <View key={u._id} className="bg-white rounded-xl p-4 mb-3">
@@ -249,18 +280,18 @@ export default function RescuerDashboard() {
                 longitudeDelta: 0.05,
               }}
             >
-              {users.map(u => {
+              {users.map((u) => {
                 const status = getStatus(u);
                 return (
                   <Marker
                     key={u._id}
                     coordinate={{ latitude: u.lat, longitude: u.lng }}
                     pinColor={
-                      status === 'SOS'
-                        ? 'red'
-                        : status === 'At Risk'
-                        ? 'orange'
-                        : 'green'
+                      status === "SOS"
+                        ? "red"
+                        : status === "Risk"
+                        ? "orange"
+                        : "green"
                     }
                     title={u.name}
                     description={`HR: ${u.bpm}`}

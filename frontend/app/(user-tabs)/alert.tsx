@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,45 +22,58 @@ type AlertItem = {
   notified: boolean;
 };
 
-export default function AlertScreen() {
-  const [alerts, setAlerts] = useState<AlertItem[]>([
-    {
-      id: '1',
-      type: 'alert',
-      message: 'Abnormal heart rate detected',
-      severity: 'medium',
-      timestamp: new Date(Date.now() - 1000 * 60 * 3),
-      notified: true,
-    },
-    {
-      id: '2',
-      type: 'sos',
-      message: 'SOS triggered manually by user',
-      severity: 'high',
-      timestamp: new Date(Date.now() - 1000 * 60 * 10),
-      notified: true,
-    },
-  ]);
+const USER_ID = 'device_001'; // replace later with auth userId
 
-  const getIconName = (type: AlertItem['type']) => {
-    return type === 'sos' ? 'alert-circle' : 'warning';
-  };
+export default function AlertScreen() {
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // ---------------- FETCH ALERTS ----------------
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const res = await fetch(
+          `https://wearable-tracker-to-detect-location.onrender.com/alerts/${USER_ID}`
+        );
+        const data = await res.json();
+
+        const formatted: AlertItem[] = data.map((item: any) => ({
+          id: item._id,
+          type: item.sos ? 'sos' : 'alert',
+          message: item.sos
+            ? 'SOS triggered by user'
+            : `Abnormal heart rate detected (${item.bpm} BPM)`,
+          severity: item.sos ? 'high' : 'medium',
+          timestamp: new Date(item.timestamp),
+          notified: true,
+        }));
+
+        setAlerts(formatted);
+      } catch (error) {
+        console.log('Error fetching alerts:', error);
+        Alert.alert('Error', 'Failed to load alerts');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlerts();
+  }, []);
+
+  // ---------------- HELPERS ----------------
+  const getIconName = (type: AlertItem['type']) =>
+    type === 'sos' ? 'alert-circle' : 'warning';
 
   const getIconColor = (severity: AlertItem['severity']) => {
-    switch (severity) {
-      case 'high':
-        return '#ef4444';
-      case 'medium':
-        return '#f59e0b';
-      default:
-        return '#10b981';
-    }
+    if (severity === 'high') return '#ef4444';
+    if (severity === 'medium') return '#f59e0b';
+    return '#10b981';
   };
 
   const clearAlerts = () => {
     Alert.alert(
       'Clear History',
-      'Are you sure you want to clear all alerts?',
+      'This will clear alerts from this view. Continue?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -70,6 +84,16 @@ export default function AlertScreen() {
       ]
     );
   };
+
+  // ---------------- LOADING ----------------
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 justify-center items-center bg-gray-50">
+        <ActivityIndicator size="large" />
+        <Text className="mt-2 text-gray-500">Loading alerts...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -114,6 +138,7 @@ export default function AlertScreen() {
             alerts.map(alert => (
               <Card key={alert.id} className="mb-3">
                 <View className="flex-row items-start">
+
                   {/* ICON */}
                   <View
                     className="w-12 h-12 rounded-full items-center justify-center mr-4"
@@ -153,6 +178,7 @@ export default function AlertScreen() {
                       </View>
                     )}
                   </View>
+
                 </View>
               </Card>
             ))
