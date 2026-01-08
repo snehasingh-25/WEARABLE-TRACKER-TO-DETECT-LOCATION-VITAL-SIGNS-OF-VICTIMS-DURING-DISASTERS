@@ -26,7 +26,7 @@ export default function Monitor() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch("https://wearable-tracker-to-detect-location.onrender.com/latest3");
+        const res = await fetch("https://wearable-tracker-to-detect-location.onrender.com/latest6");
         const json = await res.json();
         setData(json);
       } catch (error) {

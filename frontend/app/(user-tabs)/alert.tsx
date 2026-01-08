@@ -30,35 +30,39 @@ export default function AlertScreen() {
 
   // ---------------- FETCH ALERTS ----------------
   useEffect(() => {
-    const fetchAlerts = async () => {
-      try {
-        const res = await fetch(
-          `https://wearable-tracker-to-detect-location.onrender.com/alerts/${USER_ID}`
-        );
-        const data = await res.json();
+  const fetchAlerts = async () => {
+    try {
+      const res = await fetch(
+        `https://wearable-tracker-to-detect-location.onrender.com/alerts/${USER_ID}`
+      );
+      const data = await res.json();
 
-        const formatted: AlertItem[] = data.map((item: any) => ({
-          id: item._id,
-          type: item.sos ? 'sos' : 'alert',
-          message: item.sos
-            ? 'SOS triggered by user'
-            : `Abnormal heart rate detected (${item.bpm} BPM)`,
-          severity: item.sos ? 'high' : 'medium',
-          timestamp: new Date(item.timestamp),
-          notified: true,
-        }));
+      const formatted: AlertItem[] = data.map((item: any) => ({
+        id: item._id,
+        type: item.sos ? 'sos' : 'alert',
+        message: item.sos
+          ? 'SOS triggered by user'
+          : `Abnormal heart rate detected (${item.bpm} BPM)`,
+        severity: item.sos ? 'high' : 'medium',
+        timestamp: new Date(item.timestamp),
+        notified: true,
+      }));
 
-        setAlerts(formatted);
-      } catch (error) {
-        console.log('Error fetching alerts:', error);
-        Alert.alert('Error', 'Failed to load alerts');
-      } finally {
-        setLoading(false);
-      }
-    };
+      setAlerts(formatted);
+    } catch (error) {
+      console.log('Error fetching alerts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchAlerts();
-  }, []);
+  fetchAlerts(); // initial load
+
+  const interval = setInterval(fetchAlerts, 5000); // 🔥 every 5 sec
+
+  return () => clearInterval(interval);
+}, []);
+
 
   // ---------------- HELPERS ----------------
   const getIconName = (type: AlertItem['type']) =>

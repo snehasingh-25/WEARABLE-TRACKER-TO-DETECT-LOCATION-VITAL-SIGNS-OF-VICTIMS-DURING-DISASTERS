@@ -152,8 +152,9 @@ app.get("/alerts/:userId", async (req, res) => {
       userId,
       $or: [
         { sos: true },
+        { bpm: { $lt: 60 } },
         { bpm: { $gt: 100 } },
-        { bpm: { $lt: 50 } },
+        { spo2: { $lt: 92 } },
       ],
     }).sort({ timestamp: -1 });
 
@@ -164,18 +165,22 @@ app.get("/alerts/:userId", async (req, res) => {
 });
 
 
+
 app.post("/sos", async (req, res) => {
   try {
-    const { userId, name, bpm, lat, lng } = req.body;
+    const { userId, name, bpm, spo2, lat, lng } = req.body;
+
 
     const sosEntry = new WearableData({
-      userId,
-      name,
-      bpm,
-      lat,
-      lng,
-      sos: true,
-    });
+  userId,
+  name,
+  bpm,
+  spo2,     
+  lat,
+  lng,
+  sos: true,
+});
+
 
     await sosEntry.save();
 

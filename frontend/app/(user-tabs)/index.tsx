@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 export default function Index() {
   const router = useRouter();
 
-  
+
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const [loadingLocation, setLoadingLocation] = useState(true);
   const [locationError, setLocationError] = useState(false);
@@ -53,93 +53,101 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const response = await fetch("https://wearable-tracker-to-detect-location.onrender.com/latest");
-      const json = await response.json();
-      setLiveData(json);
-    } catch (error) {
-      console.log("Error fetching data:", error);
-    } finally {
-      setLoading(false);
-    }
+    const fetchData = async () => {
+      try {
+        const response = await fetch("https://wearable-tracker-to-detect-location.onrender.com/latest");
+        const json = await response.json();
+        setLiveData(json);
+      } catch (error) {
+        console.log("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Auto refresh every 5 seconds
+    const interval = setInterval(fetchData, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const user = { name: 'Sneha Singh' };
+  type VitalStatus = 'Safe' | 'Risk';
+
+  const vitals: { heartRate: number; spo2: number } = {
+    heartRate: liveData?.bpm,
+    spo2: liveData?.spo2,
   };
 
-  fetchData();
 
-  // Auto refresh every 5 seconds
-  const interval = setInterval(fetchData, 5000);
+  const status =
+    vitals.heartRate >= 60 && vitals.heartRate <= 100
+      ? "Safe"
+      : "Risk";
 
-  return () => clearInterval(interval);
-}, []);
-
-const user = { name: 'Sneha Singh' };
-type VitalStatus = 'Safe' | 'Risk';
-const vitals: {heartRate: number; temperature: number } = {
-  heartRate: liveData?.bpm,
-  temperature: 36.7
-};
-const status = vitals.heartRate > 100 ? "Risk" : "Safe";
 
 
   const handleSOS = async () => {
-  if (!location || !liveData) {
-    Alert.alert("Error", "Location or vitals not available");
-    return;
-  }
+    if (!location || !liveData) {
+      Alert.alert("Error", "Location or vitals not available");
+      return;
+    }
 
-  Alert.alert(
-    "Send SOS",
-    "Are you sure you want to send an emergency alert?",
-    [
+    Alert.alert(
+      "Send SOS",
+      "Are you sure you want to send an emergency alert?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Send SOS",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await fetch(
+                "https://wearable-tracker-to-detect-location.onrender.com/sos",
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    userId: "user_001",
+                    name: user.name,
+                    bpm: liveData.bpm,
+                    spo2: liveData.spo2,
+                    lat: location.latitude,
+                    lng: location.longitude,
+                  }),
+                }
+              );
+
+              Alert.alert(
+                "SOS Sent",
+                "Rescue team has been notified with your live location."
+              );
+            } catch (error) {
+              Alert.alert("Error", "Failed to send SOS");
+            }
+          },
+        },
+      ]
+    );
+  };
+
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
       { text: "Cancel", style: "cancel" },
       {
-        text: "Send SOS",
+        text: "Logout",
         style: "destructive",
         onPress: async () => {
-          try {
-            await fetch(
-              "https://wearable-tracker-to-detect-location.onrender.com/sos",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  userId: "device_001",
-                  name: user.name,
-                  bpm: liveData.bpm,
-                  lat: location.latitude,
-                  lng: location.longitude,
-                }),
-              }
-            );
-
-            Alert.alert(
-              "SOS Sent",
-              "Rescue team has been notified with your live location."
-            );
-          } catch (error) {
-            Alert.alert("Error", "Failed to send SOS");
-          }
+          await logout();
+          router.replace("/(auth)/sign-in");
         },
       },
-    ]
-  );
-};
-
-
-const handleLogout = () => {
-  Alert.alert("Logout", "Are you sure you want to logout?", [
-    { text: "Cancel", style: "cancel" },
-    {
-      text: "Logout",
-      style: "destructive",
-      onPress: async () => {
-        await logout();
-        router.replace("/(auth)/sign-in");
-      },
-    },
-  ]);
-};
+    ]);
+  };
 
 
 
@@ -189,10 +197,17 @@ const handleLogout = () => {
           <Text className="text-gray-900 text-base font-semibold mb-2">Vital Signs</Text>
           <View className="flex-row">
             <View className="flex-1 mr-3">
-              <VitalSignCard icon="heart" label="Heart Rate" value={vitals.heartRate} unit="BPM" color="#ef4444" />
+              <VitalSignCard icon="heart" label="Heart Rate(Pulse Based)" value={vitals.heartRate} unit="BPM" color="#ef4444" />
             </View>
             <View className="flex-1">
-              <VitalSignCard icon="thermometer" label="Temperature" value={vitals.temperature} unit="°C" color="#f59e0b" />
+              <VitalSignCard
+                icon="pulse"
+                label="SpO₂"
+                value={vitals.spo2}
+                unit="%"
+                color="#3b82f6"
+              />
+
             </View>
           </View>
         </View>
