@@ -22,7 +22,7 @@ type AlertItem = {
   notified: boolean;
 };
 
-const USER_ID = 'device_001'; // replace later with auth userId
+const USER_ID = 'user_001'; // replace later with auth userId
 
 export default function AlertScreen() {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);

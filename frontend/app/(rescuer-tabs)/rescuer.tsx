@@ -20,6 +20,7 @@ type UserEntry = {
   userId: string;
   name: string;
   bpm: number;
+  spo2: number;
   lat: number;
   lng: number;
   sos: boolean;
@@ -48,9 +49,11 @@ export default function RescuerDashboard() {
   // ---------------- STATUS LOGIC ----------------
   const getStatus = (user: UserEntry): StatusType => {
     if (user.sos) return "SOS";
-    if (user.bpm > 100 || user.bpm < 50) return "Risk";
+    if (user.bpm < 60 || user.bpm > 100) return "Risk";
+    if (user.spo2 < 92) return "Risk";
     return "Safe";
   };
+
 
   const statusColor = (status: StatusType) => {
     if (status === "SOS") return "#dc2626";
@@ -207,15 +210,13 @@ export default function RescuerDashboard() {
         {["list", "map"].map((v) => (
           <TouchableOpacity
             key={v}
-            className={`flex-1 items-center py-1 rounded-full ${
-              selectedView === v ? "bg-blue-500" : ""
-            }`}
+            className={`flex-1 items-center py-1 rounded-full ${selectedView === v ? "bg-blue-500" : ""
+              }`}
             onPress={() => setSelectedView(v as any)}
           >
             <Text
-              className={`text-xs ${
-                selectedView === v ? "text-white" : "text-gray-600"
-              }`}
+              className={`text-xs ${selectedView === v ? "text-white" : "text-gray-600"
+                }`}
             >
               {v.toUpperCase()}
             </Text>
@@ -245,6 +246,10 @@ export default function RescuerDashboard() {
 
                 <Text className="text-sm text-gray-600 mb-1">
                   HR: <Text className="font-semibold">{u.bpm} BPM</Text>
+                </Text>
+
+                <Text className="text-sm text-gray-600 mb-1">
+                  SpO₂: <Text className="font-semibold">{u.spo2}%</Text>
                 </Text>
 
                 <Text className="text-xs text-gray-400 mb-2">
@@ -290,11 +295,11 @@ export default function RescuerDashboard() {
                       status === "SOS"
                         ? "red"
                         : status === "Risk"
-                        ? "orange"
-                        : "green"
+                          ? "orange"
+                          : "green"
                     }
                     title={u.name}
-                    description={`HR: ${u.bpm}`}
+                    description={`HR: ${u.bpm} BPM | SpO₂: ${u.spo2}%`}
                     onCalloutPress={() =>
                       openGoogleMapsRoute(u.lat, u.lng, u.name)
                     }

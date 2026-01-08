@@ -38,10 +38,14 @@ export default function Index() {
         const loc = await Location.getCurrentPositionAsync({
           accuracy: Location.Accuracy.Balanced,
         });
+        // setLocation({
+        //   latitude: 13.151252,
+        //   longitude: 77.609938,
+        // });
         setLocation({
-          latitude: 13.151252,
-          longitude: 77.609938,
-        });
+  latitude: loc.coords.latitude,
+  longitude: loc.coords.longitude,
+});
         setLoadingLocation(false);
       } catch (error) {
         console.error('Location error:', error);
@@ -73,7 +77,7 @@ export default function Index() {
     return () => clearInterval(interval);
   }, []);
 
-  const user = { name: 'Sneha Singh' };
+  const user = { name: 'Sneha' };
   type VitalStatus = 'Safe' | 'Risk';
 
   const vitals: { heartRate: number; spo2: number } = {
@@ -197,7 +201,7 @@ export default function Index() {
           <Text className="text-gray-900 text-base font-semibold mb-2">Vital Signs</Text>
           <View className="flex-row">
             <View className="flex-1 mr-3">
-              <VitalSignCard icon="heart" label="Heart Rate(Pulse Based)" value={vitals.heartRate} unit="BPM" color="#ef4444" />
+              <VitalSignCard icon="heart" label={"Heart Rate\n(Pulse Based)"} value={vitals.heartRate} unit="BPM" color="#ef4444" />
             </View>
             <View className="flex-1">
               <VitalSignCard
