@@ -77,7 +77,7 @@ export default function Index() {
     return () => clearInterval(interval);
   }, []);
 
-  const user = { name: 'Sneha' };
+  const user = { name: 'User' };
   type VitalStatus = 'Safe' | 'Risk';
 
   const vitals: { heartRate: number; spo2: number } = {

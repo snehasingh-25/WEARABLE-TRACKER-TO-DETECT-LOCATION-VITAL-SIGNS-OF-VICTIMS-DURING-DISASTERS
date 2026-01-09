@@ -22,7 +22,7 @@ const SignIn = () => {
   try {
     setIsSubmitting(true);
 
-    const res = await fetch("http://192.168.0.104:3000/auth/login", {
+    const res = await fetch("https://wearable-tracker-to-detect-location.onrender.com/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }), // ✅ FIX

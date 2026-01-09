@@ -23,6 +23,57 @@ app.get("/", (req, res) => {
 
 // ------------------ AUTH (LOGIN) ------------------
 
+// ------------------ AUTH (SIGNUP) ------------------
+
+app.post("/auth/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    res.status(200).json({
+      userId: "device_" + Date.now(),
+      name,
+      role: "user",
+      message: "Signup successful",
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+
+
+// app.post("/auth/login", (req, res) => {
+//   const { email } = req.body;
+
+//   if (!email) {
+//     return res.status(400).json({ error: "Email is required" });
+//   }
+
+//   // Hardcoded users for demo
+//   if (email === "user@gmail.com" ) {
+//     return res.json({
+//       userId: "device_001",
+//       name: "Sneha Singh",
+//       role: "user",
+//     });
+//   }
+
+//   if (email === "rescuer@gmail.com") {
+//     return res.json({
+//       userId: "rescuer_001",
+//       name: "Rescue Officer",
+//       role: "rescuer",
+//     });
+//   }
+
+//   return res.status(401).json({ error: "Unauthorized user" });
+// });
+
 app.post("/auth/login", (req, res) => {
   const { email } = req.body;
 
@@ -30,15 +81,7 @@ app.post("/auth/login", (req, res) => {
     return res.status(400).json({ error: "Email is required" });
   }
 
-  // Hardcoded users for demo
-  if (email === "user@gmail.com") {
-    return res.json({
-      userId: "device_001",
-      name: "Sneha Singh",
-      role: "user",
-    });
-  }
-
+  // Rescuer (special access)
   if (email === "rescuer@gmail.com") {
     return res.json({
       userId: "rescuer_001",
@@ -47,7 +90,12 @@ app.post("/auth/login", (req, res) => {
     });
   }
 
-  return res.status(401).json({ error: "Unauthorized user" });
+  // Any other email = normal user
+  return res.json({
+    userId: "device_" + Date.now(),
+    name: email.split("@")[0],   // auto name from email
+    role: "user",
+  });
 });
 
 

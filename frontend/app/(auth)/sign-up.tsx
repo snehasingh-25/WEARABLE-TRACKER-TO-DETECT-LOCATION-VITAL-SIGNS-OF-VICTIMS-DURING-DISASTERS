@@ -1,63 +1,93 @@
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, View } from 'react-native';
 import CustomButton from '../../components/CustomButton';
 import CustomInput from '../../components/CustomInput';
 
-
 const SignUp = () => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const router = useRouter();
 
-    const submit = async () => {
-        const { name, email, password } = form;
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', password: '' });
 
-        if(!name || !email || !password) return Alert.alert('Error', 'Please enter valid email address & password.');
+  const submit = async () => {
+    const { name, email, password } = form;
 
-        setIsSubmitting(true)
-
-        
+    if (!name || !email || !password) {
+      return Alert.alert("Error", "Please fill all fields");
     }
 
-    return (
-        <View className="gap-10 bg-white rounded-lg p-5 mt-5">
-            <CustomInput
-                placeholder="Enter your full name"
-                value={form.name}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, name: text }))}
-                label="Full name"
-            />
-            <CustomInput
-                placeholder="Enter your email"
-                value={form.email}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, email: text }))}
-                label="Email"
-                keyboardType="email-address"
-            />
-            <CustomInput
-                placeholder="Enter your password"
-                value={form.password}
-                onChangeText={(text) => setForm((prev) => ({ ...prev, password: text }))}
-                label="Password"
-                secureTextEntry={true}
-            />
+    try {
+      setIsSubmitting(true);
 
-            <CustomButton
-                title="Sign Up"
-                isLoading={isSubmitting}
-                onPress={submit}
-            />
+      const res = await fetch(
+        "https://wearable-tracker-to-detect-location.onrender.com/auth/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        }
+      );
 
-            <View className="flex justify-center mt-5 flex-row gap-2">
-                <Text className="base-regular text-gray-100">
-                    Already have an account?
-                </Text>
-                <Link href="/sign-in" className="base-bold text-blue-950">
-                    Sign In
-                </Link>
-            </View>
-        </View>
-    )
-}
+      const data = await res.json();
 
-export default SignUp
+      if (!res.ok) {
+        throw new Error(data.error || "Signup failed");
+      }
+
+      Alert.alert("Success", "Account created successfully!");
+
+      
+      router.push("/sign-in");
+
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <View className="gap-10 bg-white rounded-lg p-5 mt-5">
+      <CustomInput
+        placeholder="Enter your full name"
+        value={form.name}
+        onChangeText={(text) => setForm(prev => ({ ...prev, name: text }))}
+        label="Full name"
+      />
+
+      <CustomInput
+        placeholder="Enter your email"
+        value={form.email}
+        onChangeText={(text) => setForm(prev => ({ ...prev, email: text }))}
+        label="Email"
+        keyboardType="email-address"
+      />
+
+      <CustomInput
+        placeholder="Enter your password"
+        value={form.password}
+        onChangeText={(text) => setForm(prev => ({ ...prev, password: text }))}
+        label="Password"
+        secureTextEntry
+      />
+
+      <CustomButton
+        title="Sign Up"
+        isLoading={isSubmitting}
+        onPress={submit}
+      />
+
+      <View className="flex justify-center mt-5 flex-row gap-2">
+        <Text className="base-regular text-gray-100">
+          Already have an account?
+        </Text>
+        <Link href="/sign-in" className="base-bold text-blue-950">
+          Sign In
+        </Link>
+      </View>
+    </View>
+  );
+};
+
+export default SignUp;
